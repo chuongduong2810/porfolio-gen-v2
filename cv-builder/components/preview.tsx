@@ -11,27 +11,85 @@ export function Preview() {
         <div className="font-medium">Live Preview</div>
       </CardHeader>
       <CardContent>
-        <div className="mx-auto w-[900px] max-w-full bg-white dark:bg-zinc-900 shadow p-8">
-          <h1 className="text-2xl font-bold mb-4">{state.title}</h1>
-          <div className="grid grid-cols-12 gap-4">
-            {state.layout.map((id) => {
-              const sec = state.sections.find((s) => s.id === id)
-              if (!sec) return null
-              const width = state.layoutMeta?.[id] ?? 12
-              const spanClass = width === 6 ? 'col-span-12 md:col-span-6' : width === 4 ? 'col-span-12 md:col-span-4' : 'col-span-12'
-              return (
-                <div key={id} className={spanClass}>
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold mb-2">{sec.title}</h2>
-                    {renderSection(sec)}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        {state.templateId === 'compact' ? (
+          <CompactPreview state={state} />
+        ) : (
+          <ClassicPreview state={state} />
+        )}
       </CardContent>
     </Card>
+  )
+}
+
+function ClassicPreview({ state }: { state: any }) {
+  return (
+    <div className="mx-auto w-[900px] max-w-full bg-white dark:bg-zinc-900 shadow p-8">
+      <h1 className="text-2xl font-bold mb-4">{state.title}</h1>
+      <div className="grid grid-cols-12 gap-4">
+        {state.layout.map((id: string) => {
+          const sec = state.sections.find((s: any) => s.id === id)
+          if (!sec) return null
+          const width = state.layoutMeta?.[id] ?? 12
+          const spanClass = width === 6 ? 'col-span-12 md:col-span-6' : width === 4 ? 'col-span-12 md:col-span-4' : 'col-span-12'
+          return (
+            <div key={id} className={spanClass}>
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">{sec.title}</h2>
+                {renderSection(sec)}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function CompactPreview({ state }: { state: any }) {
+  const sidebarTypes = new Set(['contact', 'skills', 'languages'])
+  const mainTypes = new Set(['profile', 'experience', 'projects', 'education', 'custom'])
+
+  return (
+    <div className="mx-auto w-[850px] max-w-full bg-white dark:bg-zinc-900 shadow p-6">
+      <div className="flex items-end justify-between border-b pb-3 mb-4">
+        <h1 className="text-2xl font-bold">{state.title}</h1>
+      </div>
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 md:col-span-4">
+          {state.layout.map((id: string) => {
+            const sec = state.sections.find((s: any) => s.id === id)
+            if (!sec || !sidebarTypes.has(sec.type)) return null
+            return (
+              <div key={id} className="mb-4">
+                <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{sec.title}</h2>
+                <div className="text-sm">
+                  {renderSection(sec)}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        <div className="col-span-12 md:col-span-8">
+          {state.layout.map((id: string) => {
+            const sec = state.sections.find((s: any) => s.id === id)
+            if (!sec || !mainTypes.has(sec.type)) return null
+            const showHeading = sec.type !== 'profile'
+            return (
+              <div key={id} className="mb-4">
+                {showHeading && (
+                  <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground border-b pb-1 mb-2">
+                    {sec.title}
+                  </h2>
+                )}
+                <div className="text-sm">
+                  {renderSection(sec)}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
   )
 }
 

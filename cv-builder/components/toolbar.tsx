@@ -7,7 +7,9 @@ import Link from 'next/link'
 
 export function Toolbar() {
   const title = useCvStore((s) => s.state.title)
+  const templateId = useCvStore((s) => s.state.templateId)
   const setTitle = useCvStore((s) => s.setTitle)
+  const setTemplate = useCvStore((s) => s.setTemplate)
   const exportPdf = useCvStore((s) => s.exportPdf)
 
   return (
@@ -17,6 +19,14 @@ export function Toolbar() {
         onChange={(e) => setTitle(e.target.value)}
         className="w-48"
       />
+      <select
+        className="h-10 rounded-md border bg-background px-3 text-sm"
+        value={templateId}
+        onChange={(e) => setTemplate(e.target.value as any)}
+      >
+        <option value="classic">Classic</option>
+        <option value="compact">Compact</option>
+      </select>
       <Button onClick={exportPdf} className="bg-secondary text-secondary-foreground border">
         <Download size={16} className="mr-2" /> Export PDF
       </Button>

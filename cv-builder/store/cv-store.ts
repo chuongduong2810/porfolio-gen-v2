@@ -2,7 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { AnySection, CvState, SectionType } from '@/lib/types'
+import { AnySection, CvState, SectionType, TemplateId } from '@/lib/types'
 import { generateId } from '@/lib/utils'
 import React from 'react'
 
@@ -14,6 +14,7 @@ interface CvStore {
   setTitle: (title: string) => void
   setLayout: (layout: string[]) => void
   setSectionWidth: (id: string, width: number) => void
+  setTemplate: (templateId: TemplateId) => void
   addSection: (type: SectionType) => void
   removeSection: (id: string) => void
   updateSection: (id: string, changes: UpdateSectionArg) => void
@@ -25,6 +26,7 @@ const initialState: CvState = {
   sections: [],
   layout: [],
   layoutMeta: {},
+  templateId: 'classic',
 }
 
 export const useCvStore = create<CvStore>()(
@@ -40,6 +42,7 @@ export const useCvStore = create<CvStore>()(
           layoutMeta: { ...(s.state.layoutMeta || {}), [id]: width },
         },
       })),
+      setTemplate: (templateId) => set((s) => ({ state: { ...s.state, templateId } })),
       addSection: (type) => set((s) => {
         const id = generateId('sec')
         const base = { id, type, title: type === 'custom' ? 'Custom' : capitalize(type) } as AnySection
@@ -97,11 +100,14 @@ export const useCvStore = create<CvStore>()(
       }),
       exportPdf: async () => {
         const current = get().state
-        const [{ pdf }, mod] = await Promise.all([
+        const [{ pdf }, templates] = await Promise.all([
           import('@react-pdf/renderer'),
-          import('@/templates/pdf-document'),
+          import('@/templates'),
         ])
-        const element = React.createElement(mod.CvPdfDocument, { state: current })
+        const Component = current.templateId === 'compact'
+          ? (templates as any).CompactCvPdfDocument
+          : (templates as any).ClassicCvPdfDocument
+        const element = React.createElement(Component, { state: current })
         const blob = await pdf(element as any).toBlob()
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')

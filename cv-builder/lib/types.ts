@@ -8,6 +8,8 @@ export type SectionType =
   | 'contact'
   | 'custom'
 
+export type TemplateId = 'classic' | 'compact'
+
 export interface SectionBase {
   id: string
   type: SectionType
@@ -103,5 +105,6 @@ export interface CvState {
   sections: AnySection[]
   layout: string[]
   layoutMeta: Record<string, number>
+  templateId: TemplateId
 }
 
